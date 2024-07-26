@@ -1,49 +1,59 @@
-:: No Man's Sky Decompressinator-F Script by CheatFreak
+:: No Man's Sky Decompressinator Script by CheatFreak
+:: See https://github.com/cheatfreak47/NMSDecompressinator for details.
+:: It requires:
+:: PSARC by Sony Computer Entertainment LLC from any PlayStation SDK that includes it. (Bundled copy is from PS3 SDK 4.50)
+:: NMSResign 1.0.1 by stk25/emoose/CheatFreak from https://github.com/cheatfreak47/NMSResign
 
-:: This is a batch file that will systematically decompress (unpack and repack uncompressed) No Man's Sky PAK files. 
-:: It requires the PS3 SDK PSARC Tool either in the same folder as this batch file or placed somewhere on the PATH Environment Variable.
-:: You can get the PS3 SDK PSARC Tool from from archive.org or dig it out of your dev files if you were a PS3 Dev. 
-:: I make no claims about the legality of doing so, though I very much doubt Sony cares about an SDK tool from over a decade ago. 
-:: You can find it here. (https://archive.org/download/ps3_sdks) in file "PS3 4.50 SDK-YLoD [450_001].7z". The required file is called psarc.exe.
-:: It also requires my NMSResign fork (https://github.com/cheatfreak47/NMSResign). Original program by stk25.
-
-:: ---------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-:: Running the game files uncompressed (but NOT unpacked) has significant performance benefits.
-:: The game has to spend no time or CPU decompressing assets. Eliminates pesky lag spikes, such as the infamous ones when entering/exiting planet atmospheres. 
-:: This performs better than running the game fully unpacked as well, since the game does not have to open 1000s of file handles to get the data.
-:: The exact amount you will benefit from this depends largely on your rig.
-
-:: To use, place psarc.exe and this batch file in install folder in \No Man's Sky\GAMEDATA\PCBANKS and run the batch file. It will take a while to run.
-:: All your old compressed pack files will be moved into "PackedFileBackup".
-:: After running, verify the game works properly for you. If it does, good! Feel free to delete the PackedFileBackup if all is well.
-
-:: 	Any Drawbacks? 
-::  	- the game takes up an assload more space- about 39GB or so, possibly more as the game keeps getting updated.
-::  	- it breaks whenever the game updates. when it breaks, validate the cache. Delete the old backup folder, and run it again.
-::  	- takes a while to run, depending on how slow your PC is.
 @echo off
+setlocal enabledelayedexpansion
 
-::ErrorChecks
-if NOT exist "BankSignatures.bin" (
-	goto :ErrorWrongDir
-)
-if NOT exist "psarc.exe" (
-	goto :ErrorMissingFile 
-)
-if NOT exist "NMSResign.exe" (
-	goto :ErrorMissingFile
-)
-if exist "PackedFileBackup" (
-	goto :ErrorBackupFolder
+:: Initialize argument variables
+set "noBackup=false"
+set "force=false"
+
+:: Check for arguments
+for %%a in (%*) do (
+    if "%%a"=="-no-backup" (
+        set "noBackup=true"
+    )
+    if "%%a"=="-force" (
+        set "force=true"
+    )
 )
 
-echo NMS Decompressinator (Full) by CheatFreak
+:: Check if any .pak files exist
+if not exist *.pak (
+    echo Error: No .pak files found in the working directory.
+	echo Please put this script, psarc.exe, and NMSResign.exe in the No Man's Sky\GAMEDATA\PCBANKS folder.
+	echo Press any key to exit.
+	pause > NUL
+    exit /b
+)
+
+:: Check if psarc.exe and NMSResign.exe exist
+if not exist psarc.exe (
+    echo Error: psarc.exe not found in the working directory.
+	echo Please put this script, psarc.exe, and NMSResign.exe in the No Man's Sky\GAMEDATA\PCBANKS folder.
+    echo Press any key to exit.
+	pause > NUL
+	exit /b
+)
+if not exist NMSResign.exe (
+    echo Error: NMSResign.exe not found in the working directory.
+	echo Please put this script, psarc.exe, and NMSResign.exe in the No Man's Sky\GAMEDATA\PCBANKS folder.
+    echo Press any key to exit.
+	pause > NUL
+	exit /b
+)
+
+:: Start Message
+echo NMS Decompressinator v2.0.0 by CheatFreak
 echo -----------------------------------------
 echo it uses....
 echo  psarc by Sony Computer Entertainment LLC
+echo     From PS3 SDK 4.50
 echo  NMSResign Fork by CheatFreak.
-echo  Original NMSResign by emoose/stk25.
+echo     (Original NMSResign by emoose/stk25.)
 echo -----------------------------------------
 echo Note: 
 echo  It may seem at some points like it has
@@ -64,51 +74,66 @@ echo 2...
 timeout /t 1 > NUL
 echo 1...
 timeout /t 1 > NUL
-cls
-@echo on
-::Make Backup Dir
-mkdir "PackedFileBackup"
-::Process .pak files one at a time using multiple operations to decompress them. 
-::Extract, Backup, Repack Uncompressed, then Delete the Unpacked Folder, and move on to the next .pak till no more .paks remain.
-for %%f in (*.pak) do (
-	psarc.exe extract "%%f" --to="%%~nf"
-	move /Y "%%~nxf" "PackedFileBackup"
-	psarc.exe create -i "%%~nf" -N -y -o "%%~nxf" -s ".*?%%~nf"
-	rmdir /s /q %%~nf
+
+:: Check if timestamp file exists and read it into a variable
+if exist timestamp.txt (
+    for /f "delims=" %%a in (timestamp.txt) do set "lastTimestamp=%%a"
+) else (
+    set "lastTimestamp=01/01/1970 00:00:00"
 )
-@echo off
-::After all that, next we backup the stock BankSignatures.bin file.
-copy /Y "BankSignatures.bin" "PackedFileBackup"
-::Now we resign the BankSignatures.bin with the new files.
+
+:: Check if PackedFileBackup directory exists
+if "!noBackup!"=="false" (
+    if not exist PackedFileBackup mkdir PackedFileBackup
+)
+
+:: Loop over the files
+for %%f in (*.pak) do (
+    :: Get the last write time of the current file
+    for /f "delims=" %%a in ('powershell -command "(Get-Item '%%f').LastWriteTime.ToString('MM/dd/yyyy HH:mm:ss')"') do set "fileTime=%%a"
+
+    :: Compare the file time with the last timestamp
+    for /f %%a in ('powershell -command "if (([datetime]'!fileTime!') -gt ([datetime]'!lastTimestamp!')) { echo true } else { echo false }"') do set "isFileNewer=%%a"
+    if "!force!"=="true" (
+        set "isFileNewer=true"
+    )
+    if !isFileNewer! equ true (
+        psarc.exe extract "%%f" --to="%%~nf"
+        if "!noBackup!"=="true" (
+            del /F /Q "%%~nxf"
+        ) else (
+            move /Y "%%~nxf" "PackedFileBackup"
+        )
+        psarc.exe create -i "%%~nf" -N -y -o "%%~nxf" -s ".*?%%~nf"
+        rmdir /s /q %%~nf
+    ) else (
+		echo Skipping %%f. Seems to be already unpacked, based on timestamp.
+	)
+)
+
+:: Backup BankSignitures
+if exist "BankSignatures.bin" (
+	if "!noBackup!"=="false" (
+		echo Backing up BankSignitures.bin
+		copy /Y "BankSignatures.bin" "PackedFileBackup" > NUL
+	)
+)
+
+:: Make New BankSignitures
 NMSResign.exe -createbin
-echo  
-echo  
-echo  
+
+:: Write the current timestamp to the file
+powershell -command "Get-Date -Format 'MM/dd/yyyy HH:mm:ss' | Out-File -FilePath timestamp.txt -Encoding ascii -Force"
+
+:: Exit Message
 echo Process complete!
 echo -----------------------------------------
 echo Enjoy a slightly less laggy No Man's Sky!
 echo -----------------------------------------
-echo Remember that if the game updates, this stops working and you will need to:
-echo   1. Validate the game cache for No Man's Sky on Steam.
-echo   2. Delete the old "PackedFileBackup" folder.
-echo   3. Run this batch script again.
-pause
-exit
-
-:ErrorWrongDir
-echo You seem to be running the batch file from the wrong directory. 
-echo After exiting, please put all files included in the download in the No Man's Sky install folder in GAMEDATA/PCBANKS.
-pause
-exit
-
-:ErrorMissingFile
-echo You seem to be missing the included psarc and NMSResign tools. Maybe you didn't copy them along with the batch file?
-echo Please add those files from the download to the GAMEDATA/PCBANKS folder in your No Man's Sky install folder.
-pause
-exit
-
-:ErrorBackupFolder
-echo You seem to be running this program again after a previous run. 
-echo Please move or delete the "PackedFileBackup" folder if you are sure that this is what you wanted to do, and run it again.
-pause
+echo After No Man's Sky updates, it is likely you will get a "File Tamepering" warning on launch.
+echo To fix this, just run the script again and it will decompress the updated files and resign.
+echo See ya next time...
+echo Press any key to exit.
+pause > NUL
+endlocal
 exit
