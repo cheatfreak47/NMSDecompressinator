@@ -51,8 +51,8 @@ echo NMS Decompressinator v2.0.0 by CheatFreak
 echo -----------------------------------------
 echo it uses....
 echo  psarc by Sony Computer Entertainment LLC
-echo     From PS3 SDK 4.50
-echo  NMSResign Fork by CheatFreak.
+echo     (From PS3 SDK 4.50)
+echo  NMSResign Fork by CheatFreak
 echo     (Original NMSResign by emoose/stk25.)
 echo -----------------------------------------
 echo Note: 
@@ -60,7 +60,6 @@ echo  It may seem at some points like it has
 echo  stopped and isn't continuing...
 echo  Don't worry, it's fine. Just patiently
 echo  wait for it to finish. It takes time.
-echo  Please do not interrupt the process.
 echo -----------------------------------------
 echo Beginning in...
 timeout /t 1 > NUL
