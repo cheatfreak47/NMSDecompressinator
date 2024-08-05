@@ -22,30 +22,42 @@ for arg in "$@"; do
     esac
 done
 
-# Check if any .pak files exist
-if ! ls *.pak &> /dev/null; then
-    echo "Error: No .pak files found in the working directory."
+# Store the original directory
+original_dir=$(pwd)
+
+# Create working directory
+working_dir="$HOME/nms_working_folder"
+mkdir -p "$working_dir"
+
+# Check if psarc.exe and NMSResign.exe exist in the current directory
+if [ ! -f psarc.exe ] || [ ! -f NMSResign.exe ]; then
+    echo "Error: psarc.exe or NMSResign.exe not found in the current directory."
     echo "Please put this script, psarc.exe, and NMSResign.exe in the No Man's Sky/GAMEDATA/PCBANKS folder."
     echo "Press any key to exit."
     read -n 1 -s
     exit 1
 fi
 
-# Check if psarc.exe and NMSResign.exe exist
-if [ ! -f psarc.exe ]; then
-    echo "Error: psarc.exe not found in the working directory."
-    echo "Please put this script, psarc.exe, and NMSResign.exe in the No Man's Sky/GAMEDATA/PCBANKS folder."
+# Move psarc.exe and NMSResign.exe to working directory
+mv psarc.exe NMSResign.exe "$working_dir/"
+
+# Move .pak files to working directory
+pak_files=(*.pak)
+if [ ${#pak_files[@]} -eq 0 ]; then
+    echo "Error: No .pak files found in the current directory."
+    echo "Please put this script in the No Man's Sky/GAMEDATA/PCBANKS folder."
     echo "Press any key to exit."
     read -n 1 -s
     exit 1
 fi
-if [ ! -f NMSResign.exe ]; then
-    echo "Error: NMSResign.exe not found in the working directory."
-    echo "Please put this script, psarc.exe, and NMSResign.exe in the No Man's Sky/GAMEDATA/PCBANKS folder."
-    echo "Press any key to exit."
-    read -n 1 -s
-    exit 1
-fi
+mv *.pak "$working_dir/"
+
+# Move BankSignatures.bin and timestamp.txt if they exist
+[ -f BankSignatures.bin ] && mv BankSignatures.bin "$working_dir/"
+[ -f timestamp.txt ] && mv timestamp.txt "$working_dir/"
+
+# Change to working directory
+cd "$working_dir" || exit 1
 
 # Start Message
 echo "NMS Decompressinator v2.0.0 by CheatFreak"
@@ -74,6 +86,7 @@ echo "2..."
 sleep 1
 echo "1..."
 sleep 1
+
 
 # Check if timestamp file exists and read it into a variable
 if [ -f timestamp.txt ]; then
@@ -110,17 +123,26 @@ for f in *.pak; do
     fi
 done
 
-# Backup BankSignitures
+# Backup BankSignatures
 if [ -f "BankSignatures.bin" ] && [ "$noBackup" = false ]; then
-    echo "Backing up BankSignitures.bin"
+    echo "Backing up BankSignatures.bin"
     cp -f "BankSignatures.bin" PackedFileBackup/
 fi
 
-# Make New BankSignitures
+# Make New BankSignatures
 wine NMSResign.exe -createbin
 
 # Write the current timestamp to the file
 date "+%Y-%m-%d %H:%M:%S" > timestamp.txt
+
+# Move processed files back to original directory
+mv -f * "$original_dir/"
+
+# Change back to original directory
+cd "$original_dir"
+
+# Clean up working directory
+rm -rf "$working_dir"
 
 # Exit Message
 echo "Process complete!"
