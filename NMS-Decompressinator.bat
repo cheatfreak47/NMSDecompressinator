@@ -1,8 +1,8 @@
 :: No Man's Sky Decompressinator Script by CheatFreak
 :: See https://github.com/cheatfreak47/NMSDecompressinator for details.
 :: It requires:
-:: PSARC by Sony Computer Entertainment LLC from any PlayStation SDK that includes it. (Bundled copy is from PS3 SDK 4.50)
-:: NMSResign 1.0.1 by stk25/emoose/CheatFreak from https://github.com/cheatfreak47/NMSResign
+:: PSARC by Sony Computer Entertainment LLC from any PlayStation SDK that includes it. (Bundled copy is from PsArcTool)
+:: NMSResign 1.0.2 by stk25/emoose/CheatFreak from https://github.com/cheatfreak47/NMSResign
 
 @echo off
 setlocal enabledelayedexpansion
@@ -47,11 +47,11 @@ if not exist NMSResign.exe (
 )
 
 :: Start Message
-echo NMS Decompressinator v2.0.0 by CheatFreak
+echo NMS Decompressinator v2.0.1 by CheatFreak
 echo -----------------------------------------
 echo it uses....
 echo  psarc by Sony Computer Entertainment LLC
-echo     (From PS3 SDK 4.50)
+echo     (From any PlayStation SDK)
 echo  NMSResign Fork by CheatFreak
 echo     (Original NMSResign by emoose/stk25.)
 echo -----------------------------------------
