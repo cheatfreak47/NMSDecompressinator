@@ -33,3 +33,18 @@ After updates or changing beta branches, you may see a "File Tampering" warning 
 Subsequent runs of the script should also be faster, as it tries to skip files that haven't been updated by checking file timestamps. This behavior can be bypassed using the `-force` argument.
 
 Happy Exploring Travelers!
+
+<!--
+#### Technical Info and Source Code:
+﻿NMS-Decompressinator uses the official PSARC (same version bundled in [PsArcTool](https://github.com/periander/PSArcTool/tree/master/PSArcTool/Resources)) and an open source [fork of NMSResign](https://github.com/cheatfreak47/NMSResign)﻿ to accomplish it's goals. The script is written in batch, and is fairly well commented. I have a [Github Repo](https://github.com/cheatfreak47/NMSDecompressinator) as well, if anyone would like to contribute or read the script directly in the browser. The script itself is licensed as Public Domain under WTFPL. NMSResign's code is licensed GPL-3.0.
+
+Are you a Linux user? There's also [a bash script on the GitHub](https://github.com/cheatfreak47/NMSDecompressinator/blob/main/NMS-Decompressinator.sh) that uses Wine to run the same operations on Linux. Simply download the bash script directly from the repo, and grab the latest release to get the required windows executables.
+-->
+
+#### Problems or Bugs?
+
+If you think you've found a bug, run into some sort of problem, or otherwise need some sort of help, feel free to submit an issue or post a comment in one of the following places:
+ - Ping @cheatfreak in **#modding** on the [Official No Man's Sky Discord](https://discord.com/invite/nomanssky)
+ - [NexusMods Comment Section](https://www.nexusmods.com/nomanssky/mods/3126?tab=posts)
+ - [Github Issue Tracker](https://github.com/cheatfreak47/NMSDecompressinator/issues)
+ - [NexusMods Bug Tracker](https://www.nexusmods.com/nomanssky/mods/3126?tab=bugs)
