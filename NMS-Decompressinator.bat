@@ -152,6 +152,7 @@ if exist "BankSignatures.bin" (
 NMSResign.exe -createbin
 
 :: Write the current timestamp to the file
+timeout /t 2 > NUL
 powershell -command "Get-Date -Format 'MM/dd/yyyy HH:mm:ss' | Out-File -FilePath timestamp.txt -Encoding ascii -Force"
 
 :: Exit Message
