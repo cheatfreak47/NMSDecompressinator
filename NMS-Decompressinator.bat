@@ -13,37 +13,57 @@ set "force=false"
 
 :: Check for arguments
 for %%a in (%*) do (
-    if "%%a"=="-no-backup" (
-        set "noBackup=true"
-    )
-    if "%%a"=="-force" (
-        set "force=true"
-    )
+	if "%%a"=="-no-backup" (
+		set "noBackup=true"
+	)
+	if "%%a"=="-force" (
+		set "force=true"
+	)
 )
 
 :: Check if any .pak files exist
 if not exist *.pak (
-    echo Error: No .pak files found in the working directory.
+	echo Error: No .pak files found in the working directory.
 	echo Please put this script, psarc.exe, and NMSResign.exe in the No Man's Sky\GAMEDATA\PCBANKS folder.
 	echo Press any key to exit.
 	pause > NUL
-    exit /b
+	exit /b
 )
 
-:: Check if psarc.exe and NMSResign.exe exist
+:: Check if psarc.exe exists
 if not exist psarc.exe (
-    echo Error: psarc.exe not found in the working directory.
+	echo Error: psarc.exe not found in the working directory.
 	echo Please put this script, psarc.exe, and NMSResign.exe in the No Man's Sky\GAMEDATA\PCBANKS folder.
-    echo Press any key to exit.
+	echo Press any key to exit.
 	pause > NUL
 	exit /b
 )
+
+:: Check if NMSResign.exe exists
 if not exist NMSResign.exe (
-    echo Error: NMSResign.exe not found in the working directory.
+	echo Error: NMSResign.exe not found in the working directory.
 	echo Please put this script, psarc.exe, and NMSResign.exe in the No Man's Sky\GAMEDATA\PCBANKS folder.
-    echo Press any key to exit.
+	echo Press any key to exit.
 	pause > NUL
 	exit /b
+)
+
+:: Check if the path is too long
+set "dir=%cd%"
+set "len=0"
+for /l %%A in (12,-1,0) do (
+	set /a "len|=1<<%%A"
+	for %%B in (!len!) do if "!dir:~%%B,1!"=="" set /a "len&=~1<<%%A"
+)
+if !len! gtr 88 (
+	echo Error: Your No Man's Sky installation path is too long for PSARC to function properly.
+	echo This is unfortunately a limitation of Windows. You will need to perform a workaround, such as
+	echo moving your PCBANKS to the root of your disk, and running the script again. After the script
+	echo completes, you can move the PCBANKS folder back into the No Man's Sky installation path. Or
+	echo you could install No Man's Sky to a different Steam Library that is closer to the drive root.
+	echo Press any key to exit.
+	pause > NUL
+	exit /b 1
 )
 
 :: Start Message
@@ -76,56 +96,56 @@ timeout /t 1 > NUL
 
 :: Check if timestamp file exists and read it into a variable
 if exist timestamp.txt (
-    for /f "delims=" %%a in (timestamp.txt) do set "lastTimestamp=%%a"
+	for /f "delims=" %%a in (timestamp.txt) do set "lastTimestamp=%%a"
 ) else (
-    set "lastTimestamp=01/01/1970 00:00:00"
+	set "lastTimestamp=01/01/1970 00:00:00"
 )
 
 :: Check if PackedFileBackup directory exists
 if "!noBackup!"=="false" (
-    if not exist PackedFileBackup mkdir PackedFileBackup
+	if not exist PackedFileBackup mkdir PackedFileBackup
 )
 
 :: Loop over the files
 for %%f in (*.pak) do (
-    :: Get the last write time of the current file
-    for /f "delims=" %%a in ('powershell -command "(Get-Item '%%f').LastWriteTime.ToString('MM/dd/yyyy HH:mm:ss')"') do set "fileTime=%%a"
+	:: Get the last write time of the current file
+	for /f "delims=" %%a in ('powershell -command "(Get-Item '%%f').LastWriteTime.ToString('MM/dd/yyyy HH:mm:ss')"') do set "fileTime=%%a"
 
-    :: Compare the file time with the last timestamp
-    for /f %%a in ('powershell -command "if (([datetime]'!fileTime!') -gt ([datetime]'!lastTimestamp!')) { echo true } else { echo false }"') do set "isFileNewer=%%a"
-    if "!force!"=="true" (
-        set "isFileNewer=true"
-    )
-    if !isFileNewer! equ true (
-        psarc.exe extract "%%f" --to="%%~nf"
-        if "!noBackup!"=="true" (
-            del /F /Q "%%~nxf"
-        ) else (
-            move /Y "%%~nxf" "PackedFileBackup"
-        )
-        psarc.exe create -i "%%~nf" -N -y -o "%%~nxf" -s ".*?%%~nf"
-        rmdir /s /q %%~nf
-    ) else (
+	:: Compare the file time with the last timestamp
+	for /f %%a in ('powershell -command "if (([datetime]'!fileTime!') -gt ([datetime]'!lastTimestamp!')) { echo true } else { echo false }"') do set "isFileNewer=%%a"
+	if "!force!"=="true" (
+		set "isFileNewer=true"
+	)
+	if !isFileNewer! equ true (
+		psarc.exe extract "%%f" --to="%%~nf"
+		if "!noBackup!"=="true" (
+			del /F /Q "%%~nxf"
+		) else (
+			move /Y "%%~nxf" "PackedFileBackup"
+		)
+		psarc.exe create -i "%%~nf" -N -y -o "%%~nxf" -s ".*?%%~nf"
+		rmdir /s /q %%~nf
+	) else (
 		echo Skipping %%f. Seems to be already unpacked, based on timestamp.
 	)
 )
 
 :: Backup BankSignitures
 if exist "BankSignatures.bin" (
-    :: Get the last write time of the BankSignatures.bin file
-    for /f "delims=" %%a in ('powershell -command "(Get-Item 'BankSignatures.bin').LastWriteTime.ToString('MM/dd/yyyy HH:mm:ss')"') do set "bankFileTime=%%a"
+	:: Get the last write time of the BankSignatures.bin file
+	for /f "delims=" %%a in ('powershell -command "(Get-Item 'BankSignatures.bin').LastWriteTime.ToString('MM/dd/yyyy HH:mm:ss')"') do set "bankFileTime=%%a"
 
-    :: Compare the BankSignatures.bin file time with the last timestamp
-    for /f %%a in ('powershell -command "if (([datetime]'!bankFileTime!') -gt ([datetime]'!lastTimestamp!')) { echo true } else { echo false }"') do set "isBankFileNewer=%%a"
+	:: Compare the BankSignatures.bin file time with the last timestamp
+	for /f %%a in ('powershell -command "if (([datetime]'!bankFileTime!') -gt ([datetime]'!lastTimestamp!')) { echo true } else { echo false }"') do set "isBankFileNewer=%%a"
 
-    if "!isBankFileNewer!"=="true" (
-        if "!noBackup!"=="false" (
-            echo Backing up BankSignitures.bin
-            copy /Y "BankSignatures.bin" "PackedFileBackup" > NUL
-        )
-    ) else (
-        echo Skipping BankSignatures.bin. This one was generated by NMSResign from the previous run, based on timestamp.
-    )
+	if "!isBankFileNewer!"=="true" (
+		if "!noBackup!"=="false" (
+			echo Backing up BankSignitures.bin
+			copy /Y "BankSignatures.bin" "PackedFileBackup" > NUL
+		)
+	) else (
+		echo Skipping BankSignatures.bin. This one was generated by NMSResign from the previous run, based on timestamp.
+	)
 )
 
 :: Make New BankSignitures
