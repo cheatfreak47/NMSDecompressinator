@@ -43,7 +43,7 @@ Are you a Linux user? There's also [a bash script on the GitHub](https://github.
 
 #### Problems or Bugs?
 
-If you think you've found a bug, run into some sort of problem, or otherwise need some sort of help, feel free to submit an issue or post a comment in one of the following places:
+If you think you've found a bug, run into some sort of problem, or otherwise need some sort of help, feel free to submit an issue or post a comment in one of the following places (in order of my preference):
  - Ping @cheatfreak in **#modding** on the [Official No Man's Sky Discord](https://discord.com/invite/nomanssky)
  - [NexusMods Comment Section](https://www.nexusmods.com/nomanssky/mods/3126?tab=posts)
  - [Github Issue Tracker](https://github.com/cheatfreak47/NMSDecompressinator/issues)
