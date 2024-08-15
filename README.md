@@ -48,3 +48,5 @@ If you think you've found a bug, run into some sort of problem, or otherwise nee
  - [NexusMods Comment Section](https://www.nexusmods.com/nomanssky/mods/3126?tab=posts)
  - [Github Issue Tracker](https://github.com/cheatfreak47/NMSDecompressinator/issues)
  - [NexusMods Bug Tracker](https://www.nexusmods.com/nomanssky/mods/3126?tab=bugs)
+ 
+If the issue you're having occurs *after* the script seems to have completed successfully, please provide a copy of your `BankSignatures.bin` file with your issue, as it can usually help me debug the problem. On Discord, you can just send me the file directly in DMs, on GitHub you will need to zip this file to upload it to your issue, and on NexusMods you can zip the file and provide a link to it on your favorite publicly accessible file hosting service, such as Google Drive, Mega, Dropbox, or my preference: [Catbox's Litterbox](https://litterbox.catbox.moe/) service, set to **3 days** so I have time to download it.
