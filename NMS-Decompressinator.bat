@@ -27,7 +27,7 @@ if not exist *.pak (
 	echo Please put this script, psarc.exe, and NMSResign.exe in the No Man's Sky\GAMEDATA\PCBANKS folder.
 	echo Press any key to exit.
 	pause > NUL
-	exit /b
+	exit /b 1
 )
 
 :: Check if psarc.exe exists
@@ -36,7 +36,7 @@ if not exist psarc.exe (
 	echo Please put this script, psarc.exe, and NMSResign.exe in the No Man's Sky\GAMEDATA\PCBANKS folder.
 	echo Press any key to exit.
 	pause > NUL
-	exit /b
+	exit /b 1
 )
 
 :: Check if NMSResign.exe exists
@@ -45,7 +45,7 @@ if not exist NMSResign.exe (
 	echo Please put this script, psarc.exe, and NMSResign.exe in the No Man's Sky\GAMEDATA\PCBANKS folder.
 	echo Press any key to exit.
 	pause > NUL
-	exit /b
+	exit /b 1
 )
 
 :: Check if the path is too long
@@ -55,7 +55,7 @@ for /l %%A in (12,-1,0) do (
 	set /a "len|=1<<%%A"
 	for %%B in (!len!) do if "!dir:~%%B,1!"=="" set /a "len&=~1<<%%A"
 )
-if !len! gtr 88 (
+if !len! gtr 88 if "%force%"=="false" (
 	echo Error: Your No Man's Sky installation path is too long for PSARC to function properly.
 	echo This is unfortunately a limitation of Windows. You will need to perform a workaround, such as
 	echo moving your PCBANKS to the root of your disk, and running the script again. After the script
@@ -64,6 +64,24 @@ if !len! gtr 88 (
 	echo Press any key to exit.
 	pause > NUL
 	exit /b 1
+)
+
+:: Try to check if the there's enough free space if it's the first run
+if not exist timestamp.txt if "%force%"=="false" (
+	for /f %%a in ('powershell -command "Get-ChildItem -Filter *.pak | ForEach-Object { $_.Length } | Measure-Object -Sum | ForEach-Object { $_.Sum }"') do set totalSize=%%a
+	for /f %%a in ('powershell -command "[math]::Round(!totalSize! * 3.25)"') do set requiredSpace=%%a
+	for /f %%a in ('powershell -command "(Get-PSDrive -PSProvider FileSystem | Where-Object { $_.Root -eq (Get-Location).Path.Substring(0,3) }).Free"') do set freeSpace=%%a
+	for /f %%a in ('powershell -command "[math]::Round(!freeSpace! / 1GB, 2)"') do set freeSpaceGB=%%a
+	for /f %%a in ('powershell -command "[math]::Round(!requiredSpace! / 1GB, 2)"') do set requiredSpaceGB=%%a
+	:: Check if there is enough free space
+	if !requiredSpaceGB! gtr !freeSpaceGB! (
+		echo Error: The disk No Man's Sky is installed does not seem to have enough free space.
+		echo Based on your .pak files, around !requiredSpaceGB!GB will be needed to decompress. ^(aka !requiredSpace! bytes^)
+		echo Your disk has only !freeSpaceGB!GB. ^(aka !freeSpace! bytes^)
+		echo Please free additional space and run the script again.
+		pause > NUL
+		exit /b 1
+	)
 )
 
 :: Start Message
