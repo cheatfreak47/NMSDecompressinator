@@ -9,6 +9,7 @@
 # Initialize argument variables
 noBackup=false
 force=false
+flatpak=false
 
 # Check for arguments
 for arg in "$@"; do
@@ -18,6 +19,9 @@ for arg in "$@"; do
             ;;
         -force)
             force=true
+            ;;
+        -flatpak)
+            flatpak=true
             ;;
     esac
 done
@@ -38,6 +42,11 @@ if [ ! -f psarc.exe ] || [ ! -f NMSResign.exe ]; then
     exit 1
 fi
 
+wine_command=wine
+if [ "$flatpak" = true ]; then
+    echo "Running via flatpak wine. Make sure to use flatseal to allow executing of wine in the home directory"
+    wine_command="flatpak run org.winehq.Wine"
+fi
 # Move psarc.exe and NMSResign.exe to working directory
 mv psarc.exe NMSResign.exe "$working_dir/"
 
@@ -110,18 +119,19 @@ for f in *.pak; do
     lastTimestampSeconds=$(date -d "$lastTimestamp" +%s)
     
     if [ "$force" = true ] || [ $isFileNewer -gt $lastTimestampSeconds ]; then
-        wine psarc.exe extract "$f" --to="${f%.pak}"
+        $wine_command psarc.exe extract "$f" --to="${f%.pak}"
         if [ "$noBackup" = true ]; then
             rm -f "$f"
         else
             mv -f "$f" PackedFileBackup/
         fi
-        wine psarc.exe create -i "${f%.pak}" -N -y -o "$f" -s ".*?${f%.pak}"
+        $wine_command psarc.exe create -i "${f%.pak}" -N -y -o "$f" -s ".*?${f%.pak}"
         rm -rf "${f%.pak}"
     else
         echo "Skipping $f. Seems to be already unpacked, based on timestamp."
     fi
 done
+
 
 # Backup BankSignatures
 if [ -f "BankSignatures.bin" ] && [ "$noBackup" = false ]; then
@@ -130,7 +140,7 @@ if [ -f "BankSignatures.bin" ] && [ "$noBackup" = false ]; then
 fi
 
 # Make New BankSignatures
-wine NMSResign.exe -createbin
+$wine_command NMSResign.exe -createbin
 
 # Write the current timestamp to the file
 date "+%Y-%m-%d %H:%M:%S" > timestamp.txt
