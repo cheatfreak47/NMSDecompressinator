@@ -67,25 +67,25 @@ if !len! gtr 88 if "%force%"=="false" (
 )
 
 :: Try to check if the there's enough free space if it's the first run
-if not exist timestamp.txt if "%force%"=="false" (
-	for /f %%a in ('powershell -command "Get-ChildItem -Filter *.pak | ForEach-Object { $_.Length } | Measure-Object -Sum | ForEach-Object { $_.Sum }"') do set totalSize=%%a
-	for /f %%a in ('powershell -command "[math]::Round(!totalSize! * 3.25)"') do set requiredSpace=%%a
-	for /f %%a in ('powershell -command "(Get-PSDrive -PSProvider FileSystem | Where-Object { $_.Root -eq (Get-Location).Path.Substring(0,3) }).Free"') do set freeSpace=%%a
-	for /f %%a in ('powershell -command "[math]::Round(!freeSpace! / 1GB, 2)"') do set freeSpaceGB=%%a
-	for /f %%a in ('powershell -command "[math]::Round(!requiredSpace! / 1GB, 2)"') do set requiredSpaceGB=%%a
-	:: Check if there is enough free space
-	if !requiredSpaceGB! gtr !freeSpaceGB! (
-		echo Error: The disk No Man's Sky is installed does not seem to have enough free space.
-		echo Based on your .pak files, around !requiredSpaceGB!GB will be needed to decompress. ^(aka !requiredSpace! bytes^)
-		echo Your disk has only !freeSpaceGB!GB. ^(aka !freeSpace! bytes^)
-		echo Please free additional space and run the script again.
-		pause > NUL
-		exit /b 1
-	)
-)
+::if not exist timestamp.txt if "%force%"=="false" (
+::	for /f %%a in ('powershell -command "Get-ChildItem -Filter *.pak | ForEach-Object { $_.Length } | Measure-Object -Sum | ForEach-Object { $_.Sum }"') do set totalSize=%%a
+::	for /f %%a in ('powershell -command "[math]::Round(!totalSize! * 3.25)"') do set requiredSpace=%%a
+::	for /f %%a in ('powershell -command "(Get-PSDrive -PSProvider FileSystem | Where-Object { $_.Root -eq (Get-Location).Path.Substring(0,3) }).Free"') do set freeSpace=%%a
+::	for /f %%a in ('powershell -command "[math]::Round(!freeSpace! / 1GB, 2)"') do set freeSpaceGB=%%a
+::	for /f %%a in ('powershell -command "[math]::Round(!requiredSpace! / 1GB, 2)"') do set requiredSpaceGB=%%a
+::	:: Check if there is enough free space
+::	if !requiredSpaceGB! gtr !freeSpaceGB! (
+::		echo Error: The disk No Man's Sky is installed does not seem to have enough free space.
+::		echo Based on your .pak files, around !requiredSpaceGB!GB will be needed to decompress. ^(aka !requiredSpace! bytes^)
+::		echo Your disk has only !freeSpaceGB!GB. ^(aka !freeSpace! bytes^)
+::		echo Please free additional space and run the script again.
+::		pause > NUL
+::		exit /b 1
+::	)
+::)
 
 :: Start Message
-echo NMS Decompressinator v2.0.2 by CheatFreak
+echo NMS Decompressinator v2.0.3 by CheatFreak
 echo -----------------------------------------
 echo it uses....
 echo  psarc by Sony Computer Entertainment LLC
@@ -93,24 +93,20 @@ echo     (From any PlayStation SDK)
 echo  NMSResign Fork by CheatFreak
 echo     (Original NMSResign by emoose/stk25.)
 echo -----------------------------------------
+echo This tool is NOT NEEDED anymore as of the
+echo No Man's Sky: Worlds Part II update.
+echo This should only be ran to optimize
+echo OLD VERSIONS of No Man's Sky, should you
+echo wish to play one of the older builds.
+echo -----------------------------------------
 echo Note: 
 echo  It may seem at some points like it has
 echo  stopped and isn't continuing...
 echo  Don't worry, it's fine. Just patiently
 echo  wait for it to finish. It takes time.
 echo -----------------------------------------
-echo Beginning in...
-timeout /t 1 > NUL
-echo 5...
-timeout /t 1 > NUL
-echo 4...
-timeout /t 1 > NUL
-echo 3...
-timeout /t 1 > NUL
-echo 2...
-timeout /t 1 > NUL
-echo 1...
-timeout /t 1 > NUL
+echo Press Any Key to Begin...
+pause > NUL
 
 :: Check if timestamp file exists and read it into a variable
 if exist timestamp.txt (

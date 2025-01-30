@@ -1,6 +1,10 @@
-### No Man's Sky Decompressinator
+# No Man's Sky Decompressinator
+## This tool is defunct as of No Man's Sky: Worlds Part II.
+### Project Status Update as of January 29th, 2025
+**As of Worlds Part II, Hello Games has implemented a new archive format (HGPAK) that is properly optimized for high speed decompression and dynamic loading, thus rendering the need for Decompressinator moot. As such, no new updates will be made to support future versions of No Man's Sky. This repo and releases will remain up as a legacy tool for use on old versions of the game. Thanks to everyone who supported this project! Have fun out there Travellers!**
+## 
 
-Decompressinator is a batch script that uses [PSARC](https://www.psdevwiki.com/ps3/PlayStation_archive_(PSARC)#PSARC) (Sony PlayStation SDK Tool) and [NMSResign](https://github.com/cheatfreak47/NMSResign) to automatically process the game `.pak` files by unpacking them and repacking with compression disabled. 
+Decompressinator is a batch script that uses [PSARC](https://www.psdevwiki.com/ps3/PlayStation_archive_(PSARC)#PSARC) (Sony PlayStation SDK Tool) and [NMSResign](https://github.com/cheatfreak47/NMSResign) to automatically process the game `.pak` files by unpacking them and repacking with compression disabled.
 
 This, in most cases, will significantly improve game performance by eliminating CPU spikes caused by on-the-fly `.pak` decompression **without** running the game files *fully* unpacked, which is another method that itself introduces significantly longer loading times due to the file system strain caused by the game needing to open handles to thousands of files.
 
@@ -13,7 +17,7 @@ Basically, this improvement happens because decompressing and repacking the file
 Obviously this performance boost comes at the cost of storage space. Uncompressing the files will roughly triple the amount of required storage space. As of No Man's Sky Worlds Part 1, assuming you delete the backup of the compressed files afterwards or ran with the `-no-backup` argument, the game takes up **~44.8GB** of storage total.
 
 #### Features:
- - Works on all No Man's Sky versions, *theoretically* including all future updates.
+ - Works on all No Man's Sky versions- Aquarius and below. Worlds Part II+ is NOT supported.
  - Doesn't conflict with any mods that load through the typical mod loading mechanisms.
  - Tries to be smart about running again after No Man's Sky updates or branch switches by checking file timestamps. (Can be bypassed using `-force`.)
  - Backs up the base game files in a sub folder in case things go wrong. (Can be bypassed by using `-no-backup`, which also slightly reduces the required free space footprint during runtime by a bit.)
